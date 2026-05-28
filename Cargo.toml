@@ -1,5 +1,5 @@
 [package]
-name = "external-media-integration"
+name = "now-playing-controls"
 version = "0.1.0"
 edition = "2024"
 

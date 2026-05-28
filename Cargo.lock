@@ -313,27 +313,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "external-media-integration"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "block2",
- "discord-rich-presence",
- "mpris-server",
- "objc2",
- "objc2-app-kit",
- "objc2-foundation",
- "objc2-media-player",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "url",
- "windows",
-]
-
-[[package]]
 name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -657,6 +636,27 @@ dependencies = [
  "serde",
  "trait-variant",
  "zbus",
+]
+
+[[package]]
+name = "now-playing-controls"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "block2",
+ "discord-rich-presence",
+ "mpris-server",
+ "objc2",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "objc2-media-player",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "windows",
 ]
 
 [[package]]

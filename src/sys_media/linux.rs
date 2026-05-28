@@ -217,7 +217,7 @@ async fn process_metadata_update(
         .artist([payload.author_name])
         .album(payload.album_name);
 
-    let track_id_str = payload.ncm_id.map_or_else(
+    let track_id_str = payload.track_id.map_or_else(
         || {
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -225,8 +225,7 @@ async fn process_metadata_update(
                 .as_millis()
                 .to_string()
         },
-        // 以免上层传入负数的 ncm_id
-        |id| id.to_string().replace('-', "_"),
+        |id| id.to_string(),
     );
 
     let track_path = format!("/com/splayer/track/{track_id_str}");
@@ -235,6 +234,10 @@ async fn process_metadata_update(
         mb = mb.trackid(op);
     } else {
         error!("生成的 Track ID 不符合 D-Bus 路径规范: {track_path}");
+    }
+
+    if !payload.genre.is_empty() {
+        mb = mb.genre(payload.genre);
     }
 
     if let Some(dur) = payload.duration {

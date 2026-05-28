@@ -325,14 +325,14 @@ impl SystemMediaControls for WindowsImpl {
             title = %payload.song_name,
             artist = %payload.author_name,
             album = %payload.album_name,
-            ncm_id = ?payload.ncm_id,
+            genre = ?payload.genre,
             "正在更新 SMTC 歌曲元数据"
         );
 
         let song_name = payload.song_name.clone();
         let author_name = payload.author_name.clone();
         let album_name = payload.album_name.clone();
-        let ncm_id = payload.ncm_id;
+        let genre = payload.genre;
         let cover_data = payload.cover_data;
 
         let new_handle = TOKIO_RUNTIME.spawn(async move {
@@ -355,10 +355,8 @@ impl SystemMediaControls for WindowsImpl {
                 let genres_collection = props.Genres()?;
                 genres_collection.Clear()?;
 
-                if let Some(id) = ncm_id
-                    && id > 0
-                {
-                    genres_collection.Append(&HSTRING::from(format!("NCM-{id}")))?;
+                for genre_str in &genre {
+                    genres_collection.Append(&HSTRING::from(genre_str))?;
                 }
 
                 if let Some(stream_ref) = thumbnail_stream_ref.as_ref() {

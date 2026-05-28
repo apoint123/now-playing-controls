@@ -16,8 +16,8 @@ use objc2_media_player::{
     MPChangePlaybackPositionCommandEvent, MPChangePlaybackRateCommandEvent,
     MPChangeRepeatModeCommandEvent, MPChangeShuffleModeCommandEvent, MPMediaItemArtwork,
     MPMediaItemPropertyAlbumTitle, MPMediaItemPropertyArtist, MPMediaItemPropertyArtwork,
-    MPMediaItemPropertyPersistentID, MPMediaItemPropertyPlaybackDuration, MPMediaItemPropertyTitle,
-    MPNowPlayingInfoCenter, MPNowPlayingInfoPropertyElapsedPlaybackTime,
+    MPMediaItemPropertyGenre, MPMediaItemPropertyPersistentID, MPMediaItemPropertyPlaybackDuration,
+    MPMediaItemPropertyTitle, MPNowPlayingInfoCenter, MPNowPlayingInfoPropertyElapsedPlaybackTime,
     MPNowPlayingInfoPropertyPlaybackRate, MPNowPlayingPlaybackState, MPRemoteCommand,
     MPRemoteCommandCenter, MPRemoteCommandEvent, MPRemoteCommandHandlerStatus, MPRepeatType,
     MPShuffleType,
@@ -376,7 +376,7 @@ impl SystemMediaControls for MacosImpl {
             title = %payload.song_name,
             artist = %payload.author_name,
             album = %payload.album_name,
-            ncm_id = ?payload.ncm_id,
+            track_id = ?payload.track_id,
             "正在更新 macOS NowPlayingInfo 元数据"
         );
 
@@ -403,6 +403,17 @@ impl SystemMediaControls for MacosImpl {
                 ProtocolObject::from_ref(MPMediaItemPropertyAlbumTitle),
             );
 
+            // 流派
+            if payload.genre.is_empty() {
+                info.removeObjectForKey(MPMediaItemPropertyGenre);
+            } else {
+                let genre_str = payload.genre.join(", ");
+                info.setObject_forKey(
+                    &NSString::from_str(&genre_str),
+                    ProtocolObject::from_ref(MPMediaItemPropertyGenre),
+                );
+            }
+
             // 重置已播放时间
             info.setObject_forKey(
                 &NSNumber::new_f64(0.0),
@@ -410,7 +421,7 @@ impl SystemMediaControls for MacosImpl {
             );
 
             // 设置唯一 PersistentID
-            let persistent_id = payload.ncm_id.unwrap_or_else(|| {
+            let persistent_id = payload.track_id.unwrap_or_else(|| {
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap_or_default()

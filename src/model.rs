@@ -78,13 +78,16 @@ pub struct MetadataPayload {
     /// Linux 平台在没有提供 `cover_data` 时会使用它
     pub original_cover_url: Option<String>,
 
-    /// 网易云音乐中对应的曲目 ID
+    /// 流派信息
     ///
-    /// ### 用途
-    /// - 以 "NCM-{ID}" 的格式上传到 SMTC 的 "流派" 字段
-    /// - 生成 Discord RPC 的按钮链接
-    /// - MacOS 和 Linux 会使用此值来填充唯一的曲目 ID
-    pub ncm_id: Option<i64>,
+    /// 在 macOS 上会使用逗号连接多个流派
+    pub genre: Vec<String>,
+
+    /// 可选的曲目 ID，用于 macOS PersistentID 和 Linux D-Bus Track ID 的唯一标识
+    pub track_id: Option<i64>,
+
+    /// Discord RPC 按钮链接，直接用于 Discord Activity 的按钮跳转
+    pub discord_button_url: Option<String>,
 
     /// 当前歌曲时长，单位是毫秒
     ///
@@ -107,7 +110,9 @@ impl fmt::Debug for MetadataPayload {
                 ),
             )
             .field("original_cover_url", &self.original_cover_url)
-            .field("ncm_id", &self.ncm_id)
+            .field("genre", &self.genre)
+            .field("track_id", &self.track_id)
+            .field("discord_button_url", &self.discord_button_url)
             .field("duration", &self.duration)
             .finish()
     }

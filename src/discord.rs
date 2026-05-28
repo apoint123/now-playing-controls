@@ -42,13 +42,13 @@ struct ActivityData {
     status: PlaybackStatus,
     current_time: f64,
     cached_cover_url: String,
-    cached_song_url: String,
+    cached_song_url: Option<String>,
 }
 
 impl ActivityData {
     fn from_metadata(metadata: MetadataPayload) -> Self {
         let cached_cover_url = Self::process_cover_url(metadata.original_cover_url.as_deref());
-        let cached_song_url = Self::process_song_url(metadata.ncm_id);
+        let cached_song_url = metadata.discord_button_url.clone();
         Self {
             metadata,
             status: PlaybackStatus::Paused,
@@ -60,7 +60,8 @@ impl ActivityData {
 
     fn update_metadata(&mut self, metadata: MetadataPayload) {
         self.cached_cover_url = Self::process_cover_url(metadata.original_cover_url.as_deref());
-        self.cached_song_url = Self::process_song_url(metadata.ncm_id);
+        self.cached_song_url
+            .clone_from(&metadata.discord_button_url);
         self.metadata = metadata;
         self.current_time = 0.0;
     }
@@ -86,13 +87,6 @@ impl ActivityData {
                 }
                 base_url.to_string()
             },
-        )
-    }
-
-    fn process_song_url(ncm_id: Option<i64>) -> String {
-        ncm_id.map_or_else(
-            || "https://music.163.com/".to_string(),
-            |id| format!("https://music.163.com/song?id={id}"),
         )
     }
 }
@@ -248,7 +242,11 @@ impl RpcWorker {
             .small_image(SP_ICON_ASSET_KEY)
             .small_text("SPlayer");
 
-        let buttons = vec![Button::new("🎧 Listen", &data.cached_song_url)];
+        let buttons = data
+            .cached_song_url
+            .as_deref()
+            .map(|url| vec![Button::new("🎧 Listen", url)])
+            .unwrap_or_default();
 
         // 不打开详细信息面板时，在用户名下方显示的小字
         let status_type = match display_mode {
